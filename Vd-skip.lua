@@ -6,6 +6,7 @@ local defaults = {
     skipVendors = true,
     skipFlightMasters = true,
     skipEmptyQuests = true,
+	skipTrainers = true,
     debugMode = false
 }
 
@@ -43,6 +44,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
         self:RegisterEvent("QUEST_GREETING")
         self:RegisterEvent("MERCHANT_SHOW")
         self:RegisterEvent("TAXIMAP_OPENED")
+		self:RegisterEvent("TRAINER_SHOW")
         DebugPrint("Addon loaded")
         return
     end
@@ -61,11 +63,14 @@ frame:SetScript("OnEvent", function(self, event, ...)
             local type = options[i + 1]
             DebugPrint("Option:", text, "Type:", type)
 
-            if VdSkipDB.skipFlightMasters and type == "taxi" then
+            if VdSkipDB.skipFlightMasters and type == "taxi" and #options == 2 then
                 DebugPrint("Selecting flight master option")
                 return SelectGossipOption((i + 1) / 2)
-            elseif VdSkipDB.skipVendors and type == "vendor" then
+            elseif VdSkipDB.skipVendors and type == "vendor" and #options == 2 then
                 DebugPrint("Selecting vendor option")
+                return SelectGossipOption((i + 1) / 2)
+			elseif VdSkipDB.skipTrainers and type == "trainer" and #options == 2 then
+				DebugPrint("Selecting trainer option")
                 return SelectGossipOption((i + 1) / 2)
             end
         end
@@ -99,6 +104,9 @@ SlashCmdList["VDSKIP"] = function(input)
     elseif input == "quests" then
         VdSkipDB.skipEmptyQuests = not VdSkipDB.skipEmptyQuests
         print(format("Vd-skip: Empty quest skipping %s", VdSkipDB.skipEmptyQuests and "|cff00ff00enabled|r" or "|cffff0000disabled|r"))
+	elseif input == "trainer" then
+        VdSkipDB.skipTrainers = not VdSkipDB.skipTrainers
+        print(format("Vd-skip: Trainer skipping %s", VdSkipDB.skipTrainers and "|cff00ff00enabled|r" or "|cffff0000disabled|r"))
     elseif input == "debug" then
         VdSkipDB.debugMode = not VdSkipDB.debugMode
         print(format("Vd-skip: Debug mode %s", VdSkipDB.debugMode and "|cff00ff00enabled|r" or "|cffff0000disabled|r"))
@@ -107,10 +115,12 @@ SlashCmdList["VDSKIP"] = function(input)
         print("|cffffff00/vdskip vendors|r - Toggle vendor skipping")
         print("|cffffff00/vdskip flight|r - Toggle flight master skipping")
         print("|cffffff00/vdskip quests|r - Toggle empty quest greeting skipping")
+		print("|cffffff00/vdskip trainer|r - Toggle trainer skipping")
         print("|cffffff00/vdskip debug|r - Toggle debug messages")
         print("Current status:")
         print(format("  Vendor skipping: %s", VdSkipDB.skipVendors and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
         print(format("  Flight master skipping: %s", VdSkipDB.skipFlightMasters and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
         print(format("  Empty quest skipping: %s", VdSkipDB.skipEmptyQuests and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
+		print(format("  Trainer skipping: %s", VdSkipDB.skipTrainers and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
     end
 end
